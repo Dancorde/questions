@@ -1,0 +1,7 @@
+{
+  "env": {
+    "MONGO_USER": "dancorde",
+    "MONGO_PASSWORD": "5jQXU8hyKH2vZv6X",
+    "MONGO_DB": "exams-dev"
+  }
+}
