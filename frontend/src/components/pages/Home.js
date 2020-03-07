@@ -15,6 +15,8 @@ class Questions extends Component {
     selectedQuestion: null
   };
 
+  isActive = true;
+
   constructor(props) {
     super(props);
     this.problemRef = React.createRef();
@@ -130,11 +132,15 @@ class Questions extends Component {
       })
       .then(resData => {
         const questions = resData.data.questions;
-        this.setState({ questions: questions, isLoading: false });
+        if (this.isActive) {
+          this.setState({ questions: questions, isLoading: false });
+        }
       })
       .catch(error => {
         console.log(error);
-        this.setState({ isLoading: false });
+        if (this.isActive) {
+          this.setState({ isLoading: false });
+        }
       });
   }
 
@@ -146,6 +152,54 @@ class Questions extends Component {
       return { selectedQuestion: selectedQuestion };
     });
   };
+
+  deleteQuestionHandler = questionId => {
+    this.setState({ isLoading: true });
+    const requestBody = {
+      query: `
+        mutation {
+          deleteQuestion(questionId: "${questionId}") {
+            _id
+            problem
+          }
+        }
+      `
+    };
+
+    fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Failed to delete question!");
+        }
+        return res.json();
+      })
+      .then(resData => {
+        this.setState(prevState => {
+          const updatedQuestions = prevState.questions.filter(
+            question => {
+              return question._id !== questionId;
+            }
+          );
+          return { questions: updatedQuestions, isLoading: false };
+        });
+      })
+      .catch(error => {
+        console.log(error);
+        if (this.isActive) {
+          this.setState({ isLoading: false });
+        }
+      });
+  };
+
+  componentWillUnmount() {
+    this.isActive = false;
+  }
 
   render() {
     return (
@@ -217,9 +271,7 @@ class Questions extends Component {
           <Modal
             title="View Question"
             canCancel
-            canConfirm
             onCancel={this.modalCancelHandler}
-            onConfirm={this.editQuestionHandler}
           >
             <p>{this.state.selectedQuestion.problem}</p>
             <p>{this.state.selectedQuestion.answer1}</p>
@@ -243,6 +295,7 @@ class Questions extends Component {
           <QuestionList
             questionList={this.state.questions}
             onViewDetail={this.showDetailHandler}
+            onDelete={this.deleteQuestionHandler}
           />
         )}
       </Fragment>

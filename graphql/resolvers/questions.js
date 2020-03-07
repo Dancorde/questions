@@ -1,4 +1,8 @@
+const DataLoader = require("dataloader");
+
 const Question = require("../../models/question");
+
+const questionLoader = new DataLoader(questionsIds => {});
 
 module.exports = {
   questions: async () => {

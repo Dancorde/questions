@@ -1,12 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const QuestionItem = ({ question, onDetail }) => {
+const QuestionItem = ({ question, onDetail, onDelete }) => {
   return (
     <li key={question._id}>
       {question.problem}
       <button onClick={onDetail.bind(this, question._id)}>
-        View Question
+        View
+      </button>
+      <button>Edit</button>
+      <button onClick={onDelete.bind(this, question._id)}>
+        Delete
       </button>
     </li>
   );
@@ -14,7 +18,8 @@ const QuestionItem = ({ question, onDetail }) => {
 
 QuestionItem.propTypes = {
   question: PropTypes.object,
-  onDetail: PropTypes.func
+  onDetail: PropTypes.func,
+  onDelete: PropTypes.func
 };
 
 export default QuestionItem;
