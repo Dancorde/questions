@@ -2,11 +2,17 @@ import React, { Component, Fragment } from "react";
 
 import Modal from "../modal/Modal";
 import Backdrop from "../backdrop/Backdrop";
+import QuestionList from "../questions/questionList/QuestionList";
+import Spinner from "../layout/Spinner";
+
 import "./Home.css";
 
 class Questions extends Component {
   state = {
-    creating: false
+    isLoading: false,
+    creating: false,
+    questions: [],
+    selectedQuestion: null
   };
 
   constructor(props) {
@@ -17,6 +23,10 @@ class Questions extends Component {
     this.answer3Ref = React.createRef();
     this.answer4Ref = React.createRef();
     this.answer5Ref = React.createRef();
+  }
+
+  componentDidMount() {
+    this.fetchQuestions();
   }
 
   createQuestionHandler = () => {
@@ -31,17 +41,6 @@ class Questions extends Component {
     const answer3 = this.answer3Ref.current.value;
     const answer4 = this.answer4Ref.current.value;
     const answer5 = this.answer5Ref.current.value;
-
-    const question = {
-      problem,
-      answer1,
-      answer2,
-      answer3,
-      answer4,
-      answer5
-    };
-
-    console.log(question);
 
     const requestBody = {
       query: `
@@ -73,7 +72,19 @@ class Questions extends Component {
         return res.json();
       })
       .then(resData => {
-        console.log(resData);
+        this.setState(prevState => {
+          const updatedQuestions = [...prevState.questions];
+          updatedQuestions.push({
+            _id: resData.data.createdQuestion._id,
+            problem: resData.data.createdQuestion.problem,
+            answer1: resData.data.createdQuestion.answer1,
+            answer2: resData.data.createdQuestion.answer2,
+            answer3: resData.data.createdQuestion.answer3,
+            answer4: resData.data.createdQuestion.answer4,
+            answer5: resData.data.createdQuestion.answer5
+          });
+          return { questions: updatedQuestions };
+        });
       })
       .catch(error => {
         console.log(error);
@@ -81,13 +92,67 @@ class Questions extends Component {
   };
 
   modalCancelHandler = () => {
-    this.setState({ creating: false });
+    this.setState({ creating: false, selectedQuestion: null });
+  };
+
+  editQuestionHandler = () => {};
+
+  fetchQuestions() {
+    this.setState({ isLoading: true });
+    const requestBody = {
+      query: `
+        query {
+          questions {
+            _id
+            problem
+            answer1
+            answer2
+            answer3
+            answer4
+            answer5
+          }
+        }
+      `
+    };
+
+    fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Failed to fetch question!");
+        }
+        return res.json();
+      })
+      .then(resData => {
+        const questions = resData.data.questions;
+        this.setState({ questions: questions, isLoading: false });
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({ isLoading: false });
+      });
+  }
+
+  showDetailHandler = questionId => {
+    this.setState(prevState => {
+      const selectedQuestion = prevState.questions.find(
+        q => q._id === questionId
+      );
+      return { selectedQuestion: selectedQuestion };
+    });
   };
 
   render() {
     return (
       <Fragment>
-        {this.state.creating && <Backdrop />}
+        {(this.state.creating || this.state.selectedQuestion) && (
+          <Backdrop />
+        )}
         {this.state.creating && (
           <Modal
             title="New Question"
@@ -148,6 +213,22 @@ class Questions extends Component {
             </form>
           </Modal>
         )}
+        {this.state.selectedQuestion && (
+          <Modal
+            title="View Question"
+            canCancel
+            canConfirm
+            onCancel={this.modalCancelHandler}
+            onConfirm={this.editQuestionHandler}
+          >
+            <p>{this.state.selectedQuestion.problem}</p>
+            <p>{this.state.selectedQuestion.answer1}</p>
+            <p>{this.state.selectedQuestion.answer2}</p>
+            <p>{this.state.selectedQuestion.answer3}</p>
+            <p>{this.state.selectedQuestion.answer4}</p>
+            <p>{this.state.selectedQuestion.answer5}</p>
+          </Modal>
+        )}
         <div className="text-center">
           <button
             className="btn"
@@ -156,6 +237,14 @@ class Questions extends Component {
             New Question
           </button>
         </div>
+        {this.state.isLoading ? (
+          <Spinner />
+        ) : (
+          <QuestionList
+            questionList={this.state.questions}
+            onViewDetail={this.showDetailHandler}
+          />
+        )}
       </Fragment>
     );
   }
