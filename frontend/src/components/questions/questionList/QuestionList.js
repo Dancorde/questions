@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import "./QuestionList.css";
 import QuestionItem from "../questionItem/QuestionItem";
 
 const QuestionList = ({
@@ -9,18 +10,19 @@ const QuestionList = ({
   onDelete,
   onEdit
 }) => {
-  const questions = questionList.map(question => {
-    return (
-      <QuestionItem
-        key={question._id}
-        question={question}
-        onDetail={onViewDetail}
-        onDelete={onDelete}
-        onEdit={onEdit}
-      />
-    );
-  });
-  return <ul>{questions}</ul>;
+  return (
+    <div className="questions-container">
+      {questionList.map(question => (
+        <QuestionItem
+          key={question._id}
+          question={question}
+          onDetail={onViewDetail}
+          onDelete={onDelete}
+          onEdit={onEdit}
+        />
+      ))}
+    </div>
+  );
 };
 
 QuestionList.propTypes = {

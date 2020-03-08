@@ -44,6 +44,14 @@ img {
   padding: 0 2rem;
 }
 
+.align-left {
+  float: left;
+}
+
+.align-right {
+  float: right;
+}
+
 /* Text Styles*/
 .text-center {
   text-align: center;
@@ -143,6 +151,12 @@ img {
   color: #fff;
 }
 
+.btn-warning,
+.bg-warning {
+  background: #ff0;
+  color: #000;
+}
+
 .btn-danger,
 .bg-danger {
   background: var(--danger-color);
@@ -240,4 +254,8 @@ img {
     text-align: center;
     justify-content: center;
   }
+}
+
+hr {
+  padding: 3px;
 }

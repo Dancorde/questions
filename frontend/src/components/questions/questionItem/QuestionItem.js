@@ -1,18 +1,33 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import "./QuestionItem.css";
+
 const QuestionItem = ({ question, onDetail, onDelete, onEdit }) => {
   return (
-    <li key={question._id}>
-      {question.problem}
-      <button onClick={onDetail.bind(this, question._id)}>
-        View
-      </button>
-      <button onClick={onEdit.bind(this, question._id)}>Edit</button>
-      <button onClick={onDelete.bind(this, question._id)}>
-        Delete
-      </button>
-    </li>
+    <div className="card">
+      <div className="problem">{question.problem}</div>
+      <div className="actions">
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={onDetail.bind(this, question._id)}
+        >
+          <i className="fa fa-eye"> View</i>
+        </button>
+        <button
+          className="btn btn-warning btn-sm"
+          onClick={onEdit.bind(this, question._id)}
+        >
+          <i className="fa fa-edit"> Edit</i>
+        </button>
+        <button
+          className="btn btn-danger btn-sm"
+          onClick={onDelete.bind(this, question._id)}
+        >
+          <i className="fa fa-trash"> Delete</i>
+        </button>
+      </div>
+    </div>
   );
 };
 
