@@ -25,6 +25,7 @@ module.exports = buildSchema(`
   }
   type RootMutation {
     createQuestion(questionInput: QuestionInput!): Question
+    updateQuestion(questionId: ID!, questionInput: QuestionInput!): Question
     deleteQuestion(questionId: ID!): Question
   }
   schema {

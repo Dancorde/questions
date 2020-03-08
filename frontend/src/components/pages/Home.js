@@ -12,7 +12,8 @@ class Questions extends Component {
     isLoading: false,
     creating: false,
     questions: [],
-    selectedQuestion: null
+    selectedQuestion: null,
+    editing: false
   };
 
   isActive = true;
@@ -20,6 +21,7 @@ class Questions extends Component {
   constructor(props) {
     super(props);
     this.problemRef = React.createRef();
+    this.editProblemRef = React.createRef();
     this.answer1Ref = React.createRef();
     this.answer2Ref = React.createRef();
     this.answer3Ref = React.createRef();
@@ -74,16 +76,18 @@ class Questions extends Component {
         return res.json();
       })
       .then(resData => {
+        console.log(resData.data);
         this.setState(prevState => {
           const updatedQuestions = [...prevState.questions];
+
           updatedQuestions.push({
-            _id: resData.data.createdQuestion._id,
-            problem: resData.data.createdQuestion.problem,
-            answer1: resData.data.createdQuestion.answer1,
-            answer2: resData.data.createdQuestion.answer2,
-            answer3: resData.data.createdQuestion.answer3,
-            answer4: resData.data.createdQuestion.answer4,
-            answer5: resData.data.createdQuestion.answer5
+            _id: resData.data.createQuestion._id,
+            problem: resData.data.createQuestion.problem,
+            answer1: resData.data.createQuestion.answer1,
+            answer2: resData.data.createQuestion.answer2,
+            answer3: resData.data.createQuestion.answer3,
+            answer4: resData.data.createQuestion.answer4,
+            answer5: resData.data.createQuestion.answer5
           });
           return { questions: updatedQuestions };
         });
@@ -94,10 +98,12 @@ class Questions extends Component {
   };
 
   modalCancelHandler = () => {
-    this.setState({ creating: false, selectedQuestion: null });
+    this.setState({
+      creating: false,
+      selectedQuestion: null,
+      editing: false
+    });
   };
-
-  editQuestionHandler = () => {};
 
   fetchQuestions() {
     this.setState({ isLoading: true });
@@ -151,6 +157,65 @@ class Questions extends Component {
       );
       return { selectedQuestion: selectedQuestion };
     });
+  };
+
+  openEditQuestionHandler = questionId => {
+    this.setState(prevState => {
+      const selectedQuestion = prevState.questions.find(
+        q => q._id === questionId
+      );
+      return { selectedQuestion: selectedQuestion, editing: true };
+    });
+  };
+
+  editQuestionHandler = questionId => {
+    this.setState({
+      selectedQuestion: null,
+      editing: false,
+      isLoading: true
+    });
+    const problem = this.problemRef.current.value;
+    const answer1 = this.answer1Ref.current.value;
+    const answer2 = this.answer2Ref.current.value;
+    const answer3 = this.answer3Ref.current.value;
+    const answer4 = this.answer4Ref.current.value;
+    const answer5 = this.answer5Ref.current.value;
+
+    const requestBody = {
+      query: `
+        mutation {
+          updateQuestion(questionId: "5e5ef43cfb57e71a00b10fa7", questionInput:{problem: "${problem}", answer1: "${answer1}", answer2: "${answer2}", answer3: "${answer3}", answer4: "${answer4}", answer5: "${answer5}"}) {
+            problem
+            answer1
+            answer2
+            answer3
+            answer4
+            answer5
+          }
+        }
+      `
+    };
+
+    fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Failed to create question!");
+        }
+        return res.json();
+      })
+      .then(resData => {
+        this.setState({ isLoading: false });
+        this.fetchQuestions();
+      })
+      .catch(error => {
+        console.log(error);
+      });
   };
 
   deleteQuestionHandler = questionId => {
@@ -215,7 +280,7 @@ class Questions extends Component {
             onCancel={this.modalCancelHandler}
             onConfirm={this.modalConfirmHandler}
           >
-            <form action="">
+            <form>
               <div>
                 <label htmlFor="problem">Problem</label>
                 <textarea
@@ -267,7 +332,7 @@ class Questions extends Component {
             </form>
           </Modal>
         )}
-        {this.state.selectedQuestion && (
+        {this.state.selectedQuestion && !this.state.editing && (
           <Modal
             title="View Question"
             canCancel
@@ -279,6 +344,72 @@ class Questions extends Component {
             <p>{this.state.selectedQuestion.answer3}</p>
             <p>{this.state.selectedQuestion.answer4}</p>
             <p>{this.state.selectedQuestion.answer5}</p>
+          </Modal>
+        )}
+        {this.state.selectedQuestion && this.state.editing && (
+          <Modal
+            title="Edit Question"
+            canCancel
+            onCancel={this.modalCancelHandler}
+            canConfirm
+            onConfirm={this.editQuestionHandler}
+          >
+            <form>
+              <div>
+                <label htmlFor="problem">Problem</label>
+                <textarea
+                  id="problem"
+                  rows="3"
+                  ref={this.problemRef}
+                  defaultValue={this.state.selectedQuestion.problem}
+                ></textarea>
+              </div>
+              <div>
+                <label htmlFor="answer1">a.</label>
+                <input
+                  type="text"
+                  id="answer1"
+                  ref={this.answer1Ref}
+                  defaultValue={this.state.selectedQuestion.answer1}
+                />
+              </div>
+              <div>
+                <label htmlFor="answer2">b.</label>
+                <input
+                  type="text"
+                  id="answer2"
+                  ref={this.answer2Ref}
+                  defaultValue={this.state.selectedQuestion.answer2}
+                />
+              </div>
+              <div>
+                <label htmlFor="answer3">c.</label>
+                <input
+                  type="text"
+                  id="answer3"
+                  ref={this.answer3Ref}
+                  defaultValue={this.state.selectedQuestion.answer3}
+                />
+              </div>
+              <div>
+                <label htmlFor="answer4">d.</label>
+                <input
+                  type="text"
+                  id="answer4"
+                  ref={this.answer4Ref}
+                  defaultValue={this.state.selectedQuestion.answer4}
+                />
+              </div>
+              <div>
+                <label htmlFor="answer5">e.</label>
+                <input
+                  type="text"
+                  id="answer5"
+                  ref={this.answer5Ref}
+                  defaultValue={this.state.selectedQuestion.answer5}
+                />
+              </div>
+            </form>
           </Modal>
         )}
         <div className="text-center">
@@ -296,6 +427,7 @@ class Questions extends Component {
             questionList={this.state.questions}
             onViewDetail={this.showDetailHandler}
             onDelete={this.deleteQuestionHandler}
+            onEdit={this.openEditQuestionHandler}
           />
         )}
       </Fragment>

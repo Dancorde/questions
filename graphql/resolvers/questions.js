@@ -1,8 +1,4 @@
-const DataLoader = require("dataloader");
-
 const Question = require("../../models/question");
-
-const questionLoader = new DataLoader(questionsIds => {});
 
 module.exports = {
   questions: async () => {
@@ -34,9 +30,39 @@ module.exports = {
       throw error;
     }
   },
+  updateQuestion: async args => {
+    const question = {
+      problem: args.questionInput.problem,
+      answer1: args.questionInput.answer1,
+      answer2: args.questionInput.answer2,
+      answer3: args.questionInput.answer3,
+      answer4: args.questionInput.answer4,
+      answer5: args.questionInput.answer5
+    };
+    try {
+      const result = await Question.findOneAndUpdate(
+        { _id: args.questionId },
+        {
+          $set: {
+            problem: args.questionInput.problem,
+            answer1: args.questionInput.answer1,
+            answer2: args.questionInput.answer2,
+            answer3: args.questionInput.answer3,
+            answer4: args.questionInput.answer4,
+            answer5: args.questionInput.answer5
+          }
+        }
+      );
+      console.log(result);
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   deleteQuestion: async args => {
     try {
-      const question = await await Question.findById(args.questionId);
+      const question = await Question.findById(args.questionId);
       await Question.deleteOne({ _id: args.questionId });
       return question;
     } catch (error) {
