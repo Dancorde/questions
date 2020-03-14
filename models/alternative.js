@@ -5,12 +5,12 @@ const Schema = mongoose.Schema;
 const alternativeSchema = new Schema({
   answer: {
     type: String,
-    required: true
+    required: true,
   },
   question: {
     type: Schema.Types.ObjectId,
-    ref: "Question"
-  }
+    ref: "Question",
+  },
 });
 
 module.exports = mongoose.model("Alternative", alternativeSchema);

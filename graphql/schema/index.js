@@ -4,29 +4,34 @@ module.exports = buildSchema(`
   type Question {
     _id: ID!
     problem: String!
-    answer1: String!
-    answer2: String!
-    answer3: String!
-    answer4: String!
-    answer5: String!
+    alternatives: [Alternative!]
+  }
+
+  type Alternative {
+    _id: ID!
+    answer: String!
+    question: Question!
   }
 
   input QuestionInput {
     problem: String!
-    answer1: String!
-    answer2: String!
-    answer3: String!
-    answer4: String!
-    answer5: String!
+  }
+
+  input AlternativeInput {
+    answer: String!
   }
 
   type RootQuery {
     questions: [Question!]!
+    alternatives(questionId: ID!): [Alternative!]!
   }
   type RootMutation {
     createQuestion(questionInput: QuestionInput!): Question
     updateQuestion(questionId: ID!, questionInput: QuestionInput!): Question
     deleteQuestion(questionId: ID!): Question
+    addAlternative(questionId: ID!, alternativeInput: AlternativeInput!): Alternative
+    updateAlternative(alternativeId: ID!, alternativeInput: AlternativeInput!): Alternative
+    removeAlternative(alternativeId: ID): Alternative
   }
   schema {
     query: RootQuery
