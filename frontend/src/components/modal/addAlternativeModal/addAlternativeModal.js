@@ -3,13 +3,13 @@ import PropTypes from "prop-types";
 
 import Modal from "../Modal";
 
-export class EditQuestionModal extends Component {
+export class AddAlternativeModal extends Component {
   static propTypes = {
     question: PropTypes.object.isRequired,
   };
 
   state = {
-    problem: this.props.question.problem,
+    answer: "",
   };
 
   modalConfirmHandler = () => {
@@ -17,13 +17,15 @@ export class EditQuestionModal extends Component {
       selectedQuestion: null,
       editing: false,
       isLoading: true,
+      adding: false,
     });
+    const questionId = this.props.question._id;
 
     const requestBody = {
       query: `
         mutation {
-          updateQuestion(questionId:"${this.props.question._id}", questionInput:{problem: "${this.state.problem}"}),{
-            problem
+          addAlternative(questionId:"${questionId}", alternativeInput:{answer: "${this.state.answer}"}),{
+            answer
           }
         }
       `,
@@ -38,7 +40,7 @@ export class EditQuestionModal extends Component {
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Failed to update question!");
+          throw new Error("Failed to add alternative!");
         }
         return res.json();
       })
@@ -50,21 +52,18 @@ export class EditQuestionModal extends Component {
 
   modalCancelHandler = () => {
     this.props.modalCancelHandler({
-      creating: false,
-      selectedQuestion: null,
-      editing: false,
+      adding: false,
     });
   };
 
   handleChange = event => {
-    this.setState({ problem: event.target.value });
+    this.setState({ answer: event.target.value });
   };
 
   render() {
-    const alternatives = this.props.question.alternatives;
     return (
       <Modal
-        title="Edit Question"
+        title="Add Alternative"
         canCancel
         canConfirm
         onCancel={this.modalCancelHandler}
@@ -72,32 +71,18 @@ export class EditQuestionModal extends Component {
       >
         <form>
           <div>
-            <label htmlFor="problem">Problem</label>
+            <label htmlFor="answer">Answer</label>
             <textarea
-              id="problem"
+              id="answer"
               rows="3"
-              value={this.state.problem}
+              value={this.state.answer}
               onChange={this.handleChange}
             ></textarea>
           </div>
-          <ul>
-            {alternatives.map(alternative => {
-              return (
-                <li key={alternative._id}>
-                  <input
-                    type="radio"
-                    value={alternative.answer}
-                    name="answer"
-                  ></input>
-                  <label style={{ padding: "5px" }}>{alternative.answer}</label>
-                </li>
-              );
-            })}
-          </ul>
         </form>
       </Modal>
     );
   }
 }
 
-export default EditQuestionModal;
+export default AddAlternativeModal;

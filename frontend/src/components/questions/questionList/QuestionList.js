@@ -8,7 +8,8 @@ const QuestionList = ({
   questionList,
   onViewDetail,
   onDelete,
-  onEdit
+  onEdit,
+  onAdd,
 }) => {
   return (
     <div className="questions-container">
@@ -19,6 +20,7 @@ const QuestionList = ({
           onDetail={onViewDetail}
           onDelete={onDelete}
           onEdit={onEdit}
+          onAdd={onAdd}
         />
       ))}
     </div>
@@ -29,7 +31,8 @@ QuestionList.propTypes = {
   questionList: PropTypes.array,
   onViewDetail: PropTypes.func,
   onDelete: PropTypes.func,
-  onEdit: PropTypes.func
+  onEdit: PropTypes.func,
+  onAdd: PropTypes.func,
 };
 
 export default QuestionList;

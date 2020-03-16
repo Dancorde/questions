@@ -6,6 +6,7 @@ import Spinner from "../layout/Spinner";
 import ViewQuestionModal from "../modal/viewQuestionModal/viewQuestionModal";
 import CreateQuestionModal from "../modal/createQuestionModal/createQuestionModal";
 import EditQuestionModal from "../modal/editQuestionModal/editQuestionModal";
+import AddAlternativeModal from "../modal/addAlternativeModal/addAlternativeModal";
 
 import "./Home.css";
 
@@ -16,6 +17,7 @@ class Questions extends Component {
     questions: [],
     selectedQuestion: null,
     editing: false,
+    adding: false,
   };
 
   isActive = true;
@@ -28,12 +30,25 @@ class Questions extends Component {
     this.setState({ creating: true });
   };
 
+  addAlternativeHandler = questionId => {
+    this.setState(prevState => {
+      const selectedQuestion = prevState.questions.find(
+        q => q._id === questionId
+      );
+      return { selectedQuestion: selectedQuestion, adding: true };
+    });
+  };
+
   modalConfirmHandler = async () => {
     this.setState({
       creating: false,
       selectedQuestion: null,
       editing: false,
+      adding: false,
     });
+    // FIXME: Atualizar a lista de questões sem ter
+    // que recarregar a página
+    window.location.reload();
   };
 
   modalCancelHandler = () => {
@@ -41,6 +56,7 @@ class Questions extends Component {
       creating: false,
       selectedQuestion: null,
       editing: false,
+      adding: false,
     });
   };
 
@@ -153,22 +169,30 @@ class Questions extends Component {
   }
 
   render() {
+    const { creating, selectedQuestion, editing, adding } = this.state;
     return (
       <Fragment>
-        {(this.state.creating || this.state.selectedQuestion) && <Backdrop />}
-        {this.state.creating && (
+        {(creating || selectedQuestion || adding) && <Backdrop />}
+        {creating && (
           <CreateQuestionModal
             modalCancelHandler={this.modalCancelHandler}
             modalConfirmHandler={this.modalConfirmHandler}
           />
         )}
-        {this.state.selectedQuestion && !this.state.editing && (
-          <ViewQuestionModal
+        {adding && (
+          <AddAlternativeModal
             question={this.state.selectedQuestion}
+            modalCancelHandler={this.modalCancelHandler}
+            modalConfirmHandler={this.modalConfirmHandler}
+          />
+        )}
+        {selectedQuestion && !editing && !adding && (
+          <ViewQuestionModal
+            question={selectedQuestion}
             modalCancelHandler={this.modalCancelHandler}
           />
         )}
-        {this.state.selectedQuestion && this.state.editing && (
+        {selectedQuestion && editing && !adding && (
           <EditQuestionModal
             question={this.state.selectedQuestion}
             modalCancelHandler={this.modalCancelHandler}
@@ -193,6 +217,7 @@ class Questions extends Component {
               onViewDetail={this.showDetailHandler}
               onDelete={this.deleteQuestionHandler}
               onEdit={this.openEditQuestionHandler}
+              onAdd={this.addAlternativeHandler}
             />
           )}
         </div>
