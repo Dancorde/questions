@@ -74,7 +74,7 @@ export class AddAlternativeModal extends Component {
             <label htmlFor="answer">Answer</label>
             <textarea
               id="answer"
-              rows="3"
+              rows="1"
               value={this.state.answer}
               onChange={this.handleChange}
             ></textarea>

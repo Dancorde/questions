@@ -60,6 +60,35 @@ export class EditQuestionModal extends Component {
     this.setState({ problem: event.target.value });
   };
 
+  removeAlternativeHandler = alternativeId => {
+    const requestBody = {
+      query: `
+        mutation {
+          removeAlternative(alternativeId: "${alternativeId}"),{
+            answer
+          }
+        }
+      `,
+    };
+
+    fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Failed to remove alternative!");
+        }
+        return res.json();
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
   render() {
     const alternatives = this.props.question.alternatives;
     return (
@@ -90,6 +119,15 @@ export class EditQuestionModal extends Component {
                     name="answer"
                   ></input>
                   <label style={{ padding: "5px" }}>{alternative.answer}</label>
+                  <button
+                    className="btn btn-danger btn-sm align-right"
+                    onClick={this.removeAlternativeHandler.bind(
+                      this,
+                      alternative._id
+                    )}
+                  >
+                    <i className="fa fa-trash"> Delete</i>
+                  </button>
                 </li>
               );
             })}
